@@ -12,6 +12,7 @@ import { VerseSuggesting } from '../verse/VerseSuggesting'
 import { BibleReferencePluginSettings } from '../data/constants'
 import { getSuggestionsFromQuery } from '../utils/getSuggestionsFromQuery'
 import { EventStats } from '../provider/EventStats'
+import { splitQuery } from '../utils/querySplitter'
 
 /**
  * Extend the EditorSuggest to suggest bible verses.
@@ -76,13 +77,14 @@ export class VerseEditorSuggester extends EditorSuggest<VerseSuggesting> {
    * Suggest bible verses.
    * @param context
    */
-  async getSuggestions(
-    context: EditorSuggestContext,
-  ): Promise<VerseSuggesting[]> {
-    const suggestions = await getSuggestionsFromQuery(
-      context.query,
-      this.settings,
-    )
+  async getSuggestions(context: EditorSuggestContext): Promise<VerseSuggesting[]> {
+    const queries = splitQuery(context.query)
+    let allSuggestions: VerseSuggesting[] = []
+    for (const q of queries) {
+      const suggestions = await getSuggestionsFromQuery(q, this.settings)
+      allSuggestions = allSuggestions.concat(suggestions)
+    }
+
     EventStats.logLookup(
       'verseLookUp',
       {
@@ -91,7 +93,8 @@ export class VerseEditorSuggester extends EditorSuggest<VerseSuggesting> {
       },
       this.settings.optOutToEvents,
     )
-    return suggestions
+
+    return allSuggestions
   }
 
   renderSuggestion(suggestion: VerseSuggesting, el: HTMLElement): void {

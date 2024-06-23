@@ -5,6 +5,7 @@ import { VerseSuggesting } from '../verse/VerseSuggesting'
 import { getSuggestionsFromQuery } from '../utils/getSuggestionsFromQuery'
 import BibleReferencePlugin from '../main'
 import { EventStats } from '../provider/EventStats'
+import { splitQuery } from '../utils/querySplitter'
 
 export class VerseLookupSuggestModal extends SuggestModal<VerseSuggesting> {
   settings: BibleReferencePluginSettings
@@ -36,7 +37,14 @@ export class VerseLookupSuggestModal extends SuggestModal<VerseSuggesting> {
         },
         this.settings.optOutToEvents
       )
-      return getSuggestionsFromQuery(`${query}`, this.settings)
+
+      const queries = splitQuery(query)
+      let allSuggestions: VerseSuggesting[] = []
+      for (const q of queries) {
+        const suggestions = await getSuggestionsFromQuery(`${q}`, this.settings)
+        allSuggestions = allSuggestions.concat(suggestions)
+      }
+      return allSuggestions
     }
     return []
   }
@@ -53,3 +61,4 @@ export class VerseLookupSuggestModal extends SuggestModal<VerseSuggesting> {
     editor.replaceRange(item.allFormattedContent, editor.getCursor())
   }
 }
+ 
