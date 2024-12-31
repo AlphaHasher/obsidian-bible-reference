@@ -16,3 +16,7 @@
 .logo {
   height: 16px;
 }
+
+.setting-disabled {
+  opacity: 0.5;
+}

@@ -118,6 +118,13 @@ Obsidian Bible Reference  is proudly powered by
     })
   }
 
+  private mayDisableSetting(setting: Setting, disable: boolean) {
+    if (disable) {
+      setting.setDisabled(disable)
+      setting.setClass("setting-disabled");
+    }
+}
+
   private displayExpertSettings(): void {
     if (this.expertSettingContainer) {
       this.expertSettingContainer.empty()
@@ -427,7 +434,8 @@ Obsidian Bible Reference  is proudly powered by
   }
 
   private setUpCollapsibleOptions(): void {
-    new Setting(this.containerEl)
+    let setting: Setting;
+    setting = new Setting(this.containerEl)
       .setName('Make Verses Collapsible *')
       .setDesc('Set how the rendered verses collapse, (This option will be disabled if Bible Icon Prefix option above is disabled)')
       .setTooltip("'+' will make the callout be expanded on default. '-' will make the callout be collapsed by default. 'None' removes that options entirely")
@@ -451,6 +459,10 @@ Obsidian Bible Reference  is proudly powered by
           )
         })
     })
+    this.mayDisableSetting(
+      setting,
+      !this.plugin.settings.displayBibleIconPrefixAtHeader
+    )
   }
 
   private setUpBibleIconPrefixToggle(): void {
